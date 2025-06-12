@@ -9,33 +9,34 @@
     </div>
 </template>
 
+
 <script setup lang="ts">
+import {loginUser, signupUser} from '../lib/auth'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 const email = ref("")
 const password = ref("")
 const error = ref<string | null>(null)
 
-const auth = getAuth()
+
 const router = useRouter()
 
 const login = async () => {
     try{
-        await signInWithEmailAndPassword(auth, email.value, password.value)
+        await loginUser(email.value, password.value)
         router.push('/chat')
     }catch(err: any){
-        error.value = err.message
+        error.value = 'ログイン失敗'
     }
 }
 
 const signup = async () => {
     try{
-        await createUserWithEmailAndPassword(auth, email.value, password.value)
+        await signupUser(email.value, password.value)
         router.push('/chat')
     }catch(err: any){
-        error.value = err.message
+        error.value = '登録に失敗しました'
     }
 }
 
