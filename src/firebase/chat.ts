@@ -1,13 +1,20 @@
-// src/firebase/chat.ts
-import { db } from '../firebase/firebase'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { db } from './firebase'
+import {
+  addDoc, collection, doc, updateDoc, getDocs, query, where, arrayUnion
+} from 'firebase/firestore'
 
-export const fetchChatRooms = async (uid: string) => {
-  const q = query(collection(db, "chatRooms"), where("members", "array-contains", uid)); 
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }))
-};
+export const createChatRoom = async (members: string[]) => {
+  const name = members.join(', ')
+  const docRef = await addDoc(collection(db, 'chatRooms'), {
+    members,
+    name,
+    createdAt: new Date()
+  })
+  return docRef.id
+}
 
+export const getChatRooms = async (email: string) => {
+  const q = query(collection(db, 'chatRooms'), where('members', 'array-contains', email))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+}

@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 共通のカスタムスタイル */
+@layer base {
+  html, body {
+    @apply bg-gray-50 text-gray-800 font-sans;
+  }
+
+  a {
+    @apply text-blue-600 hover:underline;
+  }
+
+  button {
+    @apply px-4 py-2 rounded font-medium transition-colors duration-200;
+  }
+
+  input {
+    @apply px-3 py-2 border border-gray-300 rounded;
+  }
+
+  .btn {
+    @apply bg-green-600 text-white hover:bg-green-700;
+  }
+
+  .input {
+    @apply w-full mb-2;
+  }
+
+  .card {
+    @apply bg-white shadow p-4 rounded;
+  }
+
+  .container {
+    @apply max-w-2xl mx-auto px-4 py-6;
+  }
+}
