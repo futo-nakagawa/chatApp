@@ -1,6 +1,15 @@
+<<<<<<< Updated upstream:src/lib/auth.ts
 import {auth, db} from '../firebase'
 import {signInWithEmailAndPassword, createUserWithEmailAndPassword} from 'firebase/auth'
+=======
+import {auth, db} from './firebase'
+import {signInWithEmailAndPassword,
+        createUserWithEmailAndPassword,
+        onAuthStateChanged
+       } from 'firebase/auth'
+>>>>>>> Stashed changes:src/firebase/auth.ts
 import {doc, setDoc} from 'firebase/firestore'
+import { useUserStore } from '../stores/user'
 
 export const loginUser = async (email: string, password: string) => {
     return signInWithEmailAndPassword(auth, email, password)
@@ -17,3 +26,19 @@ export const signupUser = async (email: string, password: string) => {
     })
     return result
 }
+<<<<<<< Updated upstream:src/lib/auth.ts
+=======
+
+export const logout = async () => {
+  await auth.signOut()
+};
+
+onAuthStateChanged(auth, (user) => {
+  const userStore = useUserStore()
+  if (user) {
+    userStore.setUser(user)
+  } else {
+    userStore.clearUser()
+  }
+})
+>>>>>>> Stashed changes:src/firebase/auth.ts
