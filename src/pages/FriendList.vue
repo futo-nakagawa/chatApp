@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getFriends } from '../firebase/friend'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '../stores/userStore'
 import NavBar from '../components/NavBar.vue'
 import ModalDialog from '../components/ModalDialog.vue'
 

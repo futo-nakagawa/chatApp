@@ -6,7 +6,7 @@ import {
   updateProfile,
 } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '../stores/userStore'
 
 type FriendlyAuthError = Error & { code?: string }
 

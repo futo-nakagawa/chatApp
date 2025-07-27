@@ -1,9 +1,6 @@
-
-
 import { auth, db } from './firebase'
 import { doc, getDoc } from 'firebase/firestore'
 
-// Retrieve user profile, including displayName and Firestore-stored name
 export const fetchUserProfile = async () => {
   const currentUser = auth.currentUser
   if (!currentUser) return null

@@ -10,7 +10,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { addFriendByEmail } from '../firebase/friend'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '../stores/userStore'
 
 const email = ref('')
 const router = useRouter()

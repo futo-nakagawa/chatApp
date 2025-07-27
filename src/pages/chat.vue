@@ -3,19 +3,22 @@
     <!-- ヘッダー -->
     <div class="bg-green-600 text-white p-4 flex items-center shadow">
       <router-link to="/chatroom" class="mr-4 font-bold">←</router-link>
-      <div class="flex items-center space-x-2">
-        <template v-if="editingName">
-          <input
-            v-model="editedName"
-            class="text-black px-2 py-1 rounded"
-            @keyup.enter="saveRoomName"
-            @blur="saveRoomName"
-          />
-        </template>
-        <template v-else>
-          <h2 class="text-lg font-semibold truncate">{{ roomName }}</h2>
-          <button @click="startEditing" class="text-sm underline">編集</button>
-        </template>
+      <div class="flex items-center space-x-2 flex-1 justify-between">
+        <div class="flex items-center space-x-2">
+          <template v-if="editingName">
+            <input
+              v-model="editedName"
+              class="text-black px-2 py-1 rounded"
+              @keyup.enter="saveRoomName"
+              @blur="saveRoomName"
+            />
+          </template>
+          <template v-else>
+            <h2 class="text-lg font-semibold truncate">{{ roomName }}</h2>
+            <button @click="startEditing" class="text-sm underline">編集</button>
+          </template>
+        </div>
+        <button @click="showSettings = true" class="text-sm underline">設定</button>
       </div>
     </div>
 
@@ -33,6 +36,30 @@
       >
         <div class="text-xs text-gray-500 mb-1">{{ msg.name }}</div>
         <div class="whitespace-pre-wrap">{{ msg.text }}</div>
+      </div>
+    </div>
+
+    <!-- ルーム設定モーダル -->
+    <div v-if="showSettings" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white p-4 rounded w-80">
+        <h3 class="text-lg font-bold mb-2">ルーム設定</h3>
+        <div class="mb-2">
+          <label class="block text-sm font-semibold mb-1">ルーム名</label>
+          <input v-model="editedRoomName" class="w-full border rounded px-2 py-1" />
+          <button @click="updateRoomName" class="mt-2 btn w-full">名前を更新</button>
+        </div>
+        <div class="mb-2">
+          <h4 class="font-semibold">メンバー</h4>
+          <ul class="mb-2">
+            <li v-for="member in members" :key="member" class="flex justify-between items-center">
+              <span>{{ member }}</span>
+              <button @click="removeMember(member)" class="text-red-500 text-xs">削除</button>
+            </li>
+          </ul>
+          <input v-model="newMemberEmail" placeholder="メールアドレス" class="w-full border rounded px-2 py-1 mb-2" />
+          <button @click="addMember" class="btn w-full">メンバー追加</button>
+        </div>
+        <button @click="showSettings = false" class="mt-4 text-gray-600 underline">閉じる</button>
       </div>
     </div>
 
@@ -66,11 +93,13 @@ import {
   serverTimestamp,
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  arrayUnion,
+  arrayRemove
 } from 'firebase/firestore'
 import { db } from '../firebase/firebase'
 import { storeToRefs } from 'pinia'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '../stores/userStore'
 import NavBar from '../components/NavBar.vue'
 
 const props = defineProps<{ roomId: string }>()
@@ -86,6 +115,11 @@ const editedName = ref('')
 const messagesRef = collection(db, `chatRooms/${props.roomId}/messages`)
 const q = query(messagesRef, orderBy('createdAt'))
 
+const showSettings = ref(false)
+const editedRoomName = ref('')
+const newMemberEmail = ref('')
+const members = ref<string[]>([])
+
 const fetchRoomName = async () => {
   const docRef = doc(db, 'chatRooms', props.roomId)
   const docSnap = await getDoc(docRef)
@@ -93,13 +127,19 @@ const fetchRoomName = async () => {
     const data = docSnap.data()
     if (data.name && data.name.trim() !== '') {
       roomName.value = data.name
+      editedRoomName.value = data.name
     } else if (data.partnerName) {
       roomName.value = `${data.partnerName}のチャット`
+      editedRoomName.value = roomName.value
     } else {
       roomName.value = '不明なルーム'
+      editedRoomName.value = ''
     }
+    members.value = data.members || []
   } else {
     roomName.value = '不明なルーム'
+    editedRoomName.value = ''
+    members.value = []
   }
 }
 
@@ -149,7 +189,30 @@ const sendMessage = async () => {
   })
   newMessage.value = ''
 }
+
+
+const updateRoomName = async () => {
+  if (!editedRoomName.value.trim()) return
+  await updateDoc(doc(db, 'chatRooms', props.roomId), { name: editedRoomName.value })
+  roomName.value = editedRoomName.value
+  showSettings.value = false
+}
+
+const addMember = async () => {
+  if (!newMemberEmail.value.trim()) return
+  await updateDoc(doc(db, 'chatRooms', props.roomId), {
+    members: arrayUnion(newMemberEmail.value.trim())
+  })
+  members.value.push(newMemberEmail.value.trim())
+  newMemberEmail.value = ''
+}
+
+const removeMember = async (email: string) => {
+  await updateDoc(doc(db, 'chatRooms', props.roomId), {
+    members: arrayRemove(email)
+  })
+  members.value = members.value.filter(m => m !== email)
+}
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

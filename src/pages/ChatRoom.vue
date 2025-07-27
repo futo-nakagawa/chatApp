@@ -57,7 +57,7 @@ import {
 } from 'firebase/firestore'
 import ModalDialog from '../components/ModalDialog.vue'
 import NavBar from '../components/NavBar.vue'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '../stores/userStore'
 
 const chatRooms = ref<any[]>([])
 const friends = ref<{ email: string; name: string }[]>([])

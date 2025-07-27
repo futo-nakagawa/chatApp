@@ -16,6 +16,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { loginUser, signupUser } from '../firebase/auth'
+import { useUserStore } from '../stores/userStore'
 
 const email = ref('')
 const password = ref('')
