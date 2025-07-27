@@ -3,21 +3,8 @@
     <!-- ヘッダー -->
     <div class="bg-green-600 text-white p-4 flex items-center shadow">
       <router-link to="/chatroom" class="mr-4 font-bold">←</router-link>
-      <div class="flex items-center space-x-2 flex-1 justify-between">
-        <div class="flex items-center space-x-2">
-          <template v-if="editingName">
-            <input
-              v-model="editedName"
-              class="text-black px-2 py-1 rounded"
-              @keyup.enter="saveRoomName"
-              @blur="saveRoomName"
-            />
-          </template>
-          <template v-else>
-            <h2 class="text-lg font-semibold truncate">{{ roomName }}</h2>
-            <button @click="startEditing" class="text-sm underline">編集</button>
-          </template>
-        </div>
+      <div class="flex items-center justify-between flex-1">
+        <h2 class="text-lg font-semibold truncate">{{ roomName }}</h2>
         <button @click="showSettings = true" class="text-sm underline">設定</button>
       </div>
     </div>
@@ -109,8 +96,6 @@ const newMessage = ref('')
 const messages = ref<any[]>([])
 const scrollArea = ref<HTMLDivElement | null>(null)
 const roomName = ref('')
-const editingName = ref(false)
-const editedName = ref('')
 
 const messagesRef = collection(db, `chatRooms/${props.roomId}/messages`)
 const q = query(messagesRef, orderBy('createdAt'))
@@ -141,21 +126,6 @@ const fetchRoomName = async () => {
     editedRoomName.value = ''
     members.value = []
   }
-}
-
-const startEditing = () => {
-  editedName.value = roomName.value
-  editingName.value = true
-}
-
-const saveRoomName = async () => {
-  if (!editedName.value.trim()) {
-    editingName.value = false
-    return
-  }
-  await updateDoc(doc(db, 'chatRooms', props.roomId), { name: editedName.value })
-  roomName.value = editedName.value
-  editingName.value = false
 }
 
 onMounted(() => {
