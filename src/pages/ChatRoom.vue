@@ -1,29 +1,34 @@
 <template>
   <div class="min-h-screen bg-gray-50 pb-20 max-w-md mx-auto px-4 pt-4">
-    <h2 class="text-2xl font-bold mb-4">チャットルーム一覧</h2>
+    <h2 class="text-xl font-semibold mb-3 text-gray-700">チャットルーム一覧</h2>
 
-    <ul class="space-y-2 mb-6">
+    <ul class="space-y-3 mb-6">
       <li
         v-for="room in chatRooms"
         :key="room.id"
-        class="flex justify-between items-center bg-white p-3 rounded shadow"
+        class="flex items-center justify-between bg-white p-3 rounded-lg shadow hover:bg-gray-50 transition"
       >
         <router-link
           :to="`/chat/${room.id}`"
-          class="text-blue-600 hover:underline truncate"
+          class="text-blue-500 hover:underline font-medium truncate"
         >
           {{ room.name }}
         </router-link>
         <button
           @click="leaveRoom(room.id)"
-          class="text-sm text-red-600 hover:underline"
+          class="text-sm text-red-600 hover:underline ml-2"
         >
           退出
         </button>
       </li>
     </ul>
 
-    <button @click="openCreateModal('create-chat')" class="btn w-full mb-2">チャット作成</button>
+    <button
+      @click="openCreateModal('create-chat')"
+      class="btn btn-primary w-full py-2 text-white bg-green-600 hover:bg-green-700 rounded mb-4"
+    >
+      チャット作成
+    </button>
 
     <ModalDialog
       :visible="modalVisible"
@@ -66,7 +71,13 @@ const loadChatRooms = async () => {
   if (!currentUser) return
   const q = query(collection(db, 'chatRooms'), where('members', 'array-contains', currentUser.email))
   const snap = await getDocs(q)
-  chatRooms.value = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+  chatRooms.value = snap.docs.map((docSnap) => {
+    const data = docSnap.data()
+    return {
+      id: docSnap.id,
+      ...data
+    }
+  })
 }
 
 const loadFriends = async () => {
@@ -103,11 +114,12 @@ const handleModalSubmit = async (payload: {
 }) => {
   if (!currentUser) return
   const members = [...payload.selected, currentUser.email]
+  const partnerName = friends.value.find(f => f.email === payload.selected[0])?.name || '相手'
   const name = payload.mode === 'create-group'
     ? payload.groupName || 'グループチャット'
-    : friends.value.find(f => f.email === payload.selected[0])?.name || 'チャット'
+    : (payload.groupName && payload.groupName.trim() !== '' ? payload.groupName : `${partnerName}のチャット`)
 
-  await addDoc(collection(db, 'chatRooms'), { name, members })
+  await addDoc(collection(db, 'chatRooms'), { name, partnerName, members })
   modalVisible.value = false
   await loadChatRooms()
 }
@@ -117,3 +129,11 @@ onMounted(() => {
   loadFriends()
 })
 </script>
+<style>
+.btn {
+  background-color: #00b900;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 4px;
+}
+</style>

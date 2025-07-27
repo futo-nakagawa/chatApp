@@ -1,20 +1,34 @@
-<!-- src/pages/chat.vue -->
 <template>
   <div class="flex flex-col h-screen bg-gray-100 pb-16">
     <!-- ヘッダー -->
     <div class="bg-green-600 text-white p-4 flex items-center shadow">
       <router-link to="/chatroom" class="mr-4 font-bold">←</router-link>
-      <h2 class="text-lg font-semibold truncate">{{ roomName }}</h2>
+      <div class="flex items-center space-x-2">
+        <template v-if="editingName">
+          <input
+            v-model="editedName"
+            class="text-black px-2 py-1 rounded"
+            @keyup.enter="saveRoomName"
+            @blur="saveRoomName"
+          />
+        </template>
+        <template v-else>
+          <h2 class="text-lg font-semibold truncate">{{ roomName }}</h2>
+          <button @click="startEditing" class="text-sm underline">編集</button>
+        </template>
+      </div>
     </div>
 
     <!-- メッセージ一覧 -->
-    <div ref="scrollArea" class="flex-1 overflow-y-auto p-3 space-y-2">
+    <div ref="scrollArea" class="flex-1 overflow-y-auto p-3 space-y-4 flex flex-col">
       <div
         v-for="msg in messages"
         :key="msg.id"
         :class="[
-          'max-w-[75%] rounded p-2',
-          msg.senderEmail === user?.email ? 'bg-green-200 self-end text-right' : 'bg-white self-start text-left'
+          'max-w-[75%] p-2 rounded-lg shadow',
+          msg.senderEmail === user?.email
+            ? 'bg-green-200 text-right ml-auto'
+            : 'bg-white text-left mr-auto'
         ]"
       >
         <div class="text-xs text-gray-500 mb-1">{{ msg.name }}</div>
@@ -52,6 +66,7 @@ import {
   serverTimestamp,
   doc,
   getDoc,
+  updateDoc
 } from 'firebase/firestore'
 import { db } from '../firebase/firebase'
 import { storeToRefs } from 'pinia'
@@ -65,6 +80,8 @@ const newMessage = ref('')
 const messages = ref<any[]>([])
 const scrollArea = ref<HTMLDivElement | null>(null)
 const roomName = ref('')
+const editingName = ref(false)
+const editedName = ref('')
 
 const messagesRef = collection(db, `chatRooms/${props.roomId}/messages`)
 const q = query(messagesRef, orderBy('createdAt'))
@@ -72,7 +89,33 @@ const q = query(messagesRef, orderBy('createdAt'))
 const fetchRoomName = async () => {
   const docRef = doc(db, 'chatRooms', props.roomId)
   const docSnap = await getDoc(docRef)
-  roomName.value = docSnap.exists() ? docSnap.data().name : '不明なルーム'
+  if (docSnap.exists()) {
+    const data = docSnap.data()
+    if (data.name && data.name.trim() !== '') {
+      roomName.value = data.name
+    } else if (data.partnerName) {
+      roomName.value = `${data.partnerName}のチャット`
+    } else {
+      roomName.value = '不明なルーム'
+    }
+  } else {
+    roomName.value = '不明なルーム'
+  }
+}
+
+const startEditing = () => {
+  editedName.value = roomName.value
+  editingName.value = true
+}
+
+const saveRoomName = async () => {
+  if (!editedName.value.trim()) {
+    editingName.value = false
+    return
+  }
+  await updateDoc(doc(db, 'chatRooms', props.roomId), { name: editedName.value })
+  roomName.value = editedName.value
+  editingName.value = false
 }
 
 onMounted(() => {
@@ -81,14 +124,12 @@ onMounted(() => {
     const tempMessages: any[] = []
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data()
-      const userDoc = await getDoc(doc(db, 'users', data.senderEmail))
-      const userData = userDoc.exists() ? userDoc.data() : { name: '不明なユーザ' }
 
       tempMessages.push({
         id: docSnap.id,
         text: data.text,
         senderEmail: data.senderEmail,
-        name: userData.name,
+        name: data.senderName || '不明なユーザ',
         createdAt: data.createdAt,
       })
     }
@@ -103,6 +144,7 @@ const sendMessage = async () => {
   await addDoc(messagesRef, {
     text: newMessage.value,
     senderEmail: user.value.email,
+    senderName: user.value.displayName || user.value.email,
     createdAt: serverTimestamp(),
   })
   newMessage.value = ''
@@ -110,11 +152,4 @@ const sendMessage = async () => {
 </script>
 
 <style scoped>
-/* メッセージの方向を統一 */
-.self-end {
-  align-self: flex-end;
-}
-.self-start {
-  align-self: flex-start;
-}
 </style>

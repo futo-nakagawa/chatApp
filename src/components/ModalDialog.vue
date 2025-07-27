@@ -13,11 +13,23 @@
           placeholder="メールアドレスを入力"
           class="w-full p-2 border rounded"
         />
-        <button @click="handleAddFriend" class="btn w-full">追加</button>
+        <div class="flex justify-end space-x-2 mt-4">
+          <button @click="$emit('close')" class="text-gray-600 px-3 py-1">キャンセル</button>
+          <button @click="handleAddFriend" class="btn">追加</button>
+        </div>
       </div>
 
       <!-- チャット作成用 -->
       <div v-else>
+        <!-- チャット名入力 -->
+        <div v-if="mode === 'create-chat'" class="mb-2">
+          <input
+            v-model="chatName"
+            type="text"
+            placeholder="チャット名を入力（未入力で相手の名前を使用）"
+            class="w-full p-2 border rounded"
+          />
+        </div>
         <!-- グループ名入力（グループモード時のみ） -->
         <div v-if="mode === 'create-group'" class="mb-2">
           <input
@@ -27,6 +39,8 @@
             class="w-full p-2 border rounded"
           />
         </div>
+
+        <div v-if="errorMessage" class="text-red-600 text-sm mb-2">{{ errorMessage }}</div>
 
         <!-- 友達リストチェック -->
         <div class="max-h-60 overflow-y-auto border rounded p-2 mb-4">
@@ -45,7 +59,7 @@
           </div>
         </div>
 
-        <div class="flex justify-end space-x-2">
+        <div class="flex justify-end space-x-2 mt-4">
           <button @click="$emit('close')" class="text-gray-600 px-3 py-1">キャンセル</button>
           <button @click="submit" class="btn">OK</button>
         </div>
@@ -73,6 +87,8 @@ const emit = defineEmits<{
 const email = ref('')
 const selected = ref<string[]>([])
 const groupName = ref('')
+const chatName = ref('')
+const errorMessage = ref('')
 
 const modeTitle = computed(() => {
   switch (props.mode) {
@@ -113,21 +129,21 @@ const handleAddFriend = async () => {
 // チャット作成（1対1 or グループ）
 const submit = () => {
   if (selected.value.length === 0) {
-    alert('1人以上選択してください')
+    errorMessage.value = '友達が選択されていません'
     return
   }
-  if (props.mode === 'create-group' && !groupName.value.trim()) {
-    alert('グループ名を入力してください')
-    return
-  }
+
+  errorMessage.value = ''
 
   emit('submit', {
     mode: props.mode,
     selected: selected.value,
     groupName: groupName.value.trim(),
+    chatName: chatName.value.trim(),
   })
   selected.value = []
   groupName.value = ''
+  chatName.value = ''
 }
 </script>
 

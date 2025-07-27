@@ -4,6 +4,7 @@ import Chatroom from '../pages/ChatRoom.vue'
 import Chat from '../pages/chat.vue'
 import AddFriend from '../pages/AddFriend.vue'
 import FriendList from '../pages/FriendList.vue'
+import MyAccount from '../pages/MyAccount.vue'
 
 const routes = [
   { path: '/', component: Login },
@@ -11,6 +12,7 @@ const routes = [
   { path: '/chat/:roomId', name: 'Chat', component: Chat, props: true },
   { path: '/addfriend', component: AddFriend },
   { path: '/friends', component: FriendList },
+  { path: '/myaccount', name: 'MyAccount', component: MyAccount, props: true}
 ]
 
 const router = createRouter({

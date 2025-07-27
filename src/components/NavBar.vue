@@ -3,6 +3,7 @@
     <div class="flex justify-around items-center py-2">
       <router-link to="/chatroom" class="nav-item">チャット</router-link>
       <router-link to="/friends" class="nav-item">友達</router-link>
+      <router-link to="/myaccount" class="nav-item">マイアカウント</router-link>
       <button @click="logoutAndRedirect" class="nav-item text-red-500">ログアウト</button>
     </div>
   </nav>

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 pb-20 max-w-md mx-auto px-4 pt-4">
-    <h2 class="text-2xl font-bold mb-4">友達一覧</h2>
+    <h2 class="text-xl font-bold mb-4">友達一覧</h2>
     <ul class="space-y-2 mb-6">
       <li
         v-for="friend in friends"
