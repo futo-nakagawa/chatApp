@@ -1,19 +1,4 @@
 <template>
-<<<<<<< Updated upstream
-  <div>
-    <h1>{{ isLogin ? 'ログイン' : 'サインアップ' }}</h1>
-    <input v-model="email" placeholder="メールアドレス" />
-    <input v-model="password" placeholder="パスワード" type="password" />
-    <input v-if="!isLogin" v-model="name" placeholder="ユーザ名" />
-
-    <button @click="handleSubmit">
-      {{ isLogin ? 'ログイン' : 'サインアップ' }}
-    </button>
-
-    <p @click="isLogin = !isLogin">
-      {{ isLogin ? 'アカウントをお持ちですか？' : 'アカウントをお持ちじゃありませんか？' }}
-    </p>
-=======
   <div class="max-w-md mx-auto py-12 px-4">
     <h2 class="text-2xl font-bold mb-4">ログイン・サインアップ</h2>
     <input v-model="email" type="email" placeholder="メール" class="input" />
@@ -23,35 +8,17 @@
       <button @click="handleLogin" class="btn">ログイン</button>
       <button @click="handleSignup" class="btn">サインアップ</button>
     </div>
->>>>>>> Stashed changes
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { loginUser, signupUser } from '../firebase/auth'
 import { useRouter } from 'vue-router'
 import { loginUser, signupUser } from '../firebase/auth'
 
 const email = ref('')
 const password = ref('')
 const name = ref('')
-<<<<<<< Updated upstream
-const isLogin = ref(true)
-
-const router = useRouter()
-
-const handleSubmit = async () => {
-  if (isLogin.value) {
-    await loginUser(email.value, password.value);
-    router.push('/chat')
-  } else {
-    await signupUser(email.value, password.value, name.value);
-    router.push('/chat')
-  }
-}
-</script>
-=======
 const router = useRouter()
 
 const handleLogin = async () => {
@@ -80,4 +47,3 @@ const handleSignup = async () => {
   border-radius: 8px;
 }
 </style>
->>>>>>> Stashed changes
